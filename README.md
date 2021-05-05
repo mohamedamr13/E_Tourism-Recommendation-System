@@ -46,7 +46,7 @@ customerPreferredAccommodation(customer(mohamed, elkasad, 1999-01-30, single, 0,
 
 ```
 
-## Get Offer
+## getOffer
 The predicate getOffer(ChosenPrefs,Offer) gets an offer Offer to match the list of preferences ChosenPrefs. The prefernces can include budget , accomomodation , period , means of transport , activities , and destination
 
 
@@ -95,3 +95,43 @@ getOffer([dest(De)|Ta],offer(De,B,Ac,VF,VT,P,DU,No)):-
 	getOffer(Ta,O).
 ```
 
+## recommendOfferForCustomer
+The predicate recommendOfferForCustomer(Prefs, ChosenPrefs, O) chooses from the list Prefs a
+subset ChosenPrefs that could be satisfied by the offer O.
+
+```prolog
+ recommendOfferForCustomer(Prefs,ChosenPrefs,Offer) :-
+	              choosePreferences(Prefs,ChosenPrefs),
+	              getOffer(ChosenPrefs,Offer).
+		                           
+ choosePreferences(Prefs, ChosenPreferences) :-
+         findActivity(Prefs,A),
+        possibleSubset(A,L),
+		replaceActivity(L,Prefs,L1),
+	     possibleSubsetH(L1,ChosenPreferences).
+					   
+		 
+```
+
+## recommendOffer
+The predicate recommendOffer(Customers, PreferenceList, Offer, CustomersChosen) takes as input
+a list of customers Customers along with their preferences PreferenceList (a list of lists, where
+the ith preference list belongs to the ith customer) and recommends an offer O. Since each offer is only
+applicable to a maximum of N guests, we choose from the given list of customers maximum N guests who
+will be satisfied the most by the recommended offer given their provided preferences.
+
+```prolog 
+
+
+recommendOffer(Customers, Prefs, Offer, CustomersChosen):-
+            findOffer(Prefs,C,Offer), 
+			findSatisfaction(Offer,Customers,C,S),
+			choose(S,C,Offer,0,Highest,Co),
+			findSatisfaction(Offer,CustomersChosen,Co,Highest).
+
+  findSatisfaction(_, [] ,_,[]).			
+findSatisfaction(H,[P|V],[R|B],[S0|S1]):-
+		 preferenceSatisfaction(H,P,R,S0),  
+		 findSatisfaction(H,V,B,S1).
+
+```
