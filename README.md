@@ -95,6 +95,100 @@ getOffer([dest(De)|Ta],offer(De,B,Ac,VF,VT,P,DU,No)):-
 	getOffer(Ta,O).
 ```
 
+
+## preferenceSatisfaction
+The predicate preferenceSatisfaction(Offer, Customer, ChosenPrefs, S) calculates S which states
+how much the customer is satisfied by the offer O, based on the knowledge present in the knowledge base
+and the preferences chosen to be satisfied.
+```prolog
+	
+		% Average Calculator 
+		   average(L,Rate,S,S1) :-
+	       L2 is L+1,
+	    R is  div(Rate,L2),
+	       S1 is S + R.
+		   
+		 isMean(means(_)).
+		 isAccomodation(accommodation(_)).
+		 
+		 isNeutral([]).
+		 isNeutral([H|T]):-
+		 not(isMean(H)),
+			not(isAccomodation(H)),
+			not(isActivity2(H)),
+			isNeutral(T).
+		 
+		   % preferenceSatisfaction(_,C,[H|T],S,0) :-
+			%      isNeutral([H|T]),
+			% 	  customerPreferredMean(C,_,_).
+		   
+		  preferenceSatisfaction(Offer,Customer,L,S) :-
+		  preferenceSatisfactionH(Offer,Customer,L,0,S).
+				 
+	      
+		
+		
+	         preferenceSatisfactionH(Offer,Customer,[H|T],S,S1):-
+	        not(isMean(H)),
+			not(isAccomodation(H)),
+			not(isActivity2(H)),
+	         preferenceSatisfactionH(Offer,Customer,T,S,S1). 
+		
+                          %%%%%ACCOMODATION%%%%%%%%%%%
+
+     preferenceSatisfactionH(Offer, Customer, [accommodation(A)|T],S,S1):-
+	             offerAccommodation(Offer,A),
+				 customerPreferredAccommodation(Customer,A,R),
+	                  S3 is S + R,
+		         preferenceSatisfactionH(Offer, Customer, T,S3,S1).
+				 
+				   preferenceSatisfactionH(Offer, Customer, [accommodation(A)|T],S,S1):-
+	              \+( offerAccommodation(Offer,A)),
+		         preferenceSatisfactionH(Offer, Customer, T,S,S1).
+				 
+				              %%%%%%%%%%%%%%%%%%%%
+		
+                  %%%%%%%%%%%%% ACTIVITY %%%%%%%%%%%%%%
+				  
+	   preferenceSatisfactionH(offer(_,Ac,_,_,_,_,_,_), Customer, [activity(A)|T],S,S1):-
+	                   getActivity(Customer,A,0,R),
+	                  S3 is S + R,
+		         preferenceSatisfactionH(offer(_,Ac,_,_,_,_,_,_), Customer, T,S3,S1).
+				 
+		preferenceSatisfactionH(offer(_,Ac,_,_,_,_,_,_), Customer, [activity(A)|T],S,S1):-
+	              \+(isActivity(A,Ac)),
+		         preferenceSatisfactionH(offer(_,Ac,_,_,_,_,_,_), Customer, T,S,S1).
+				 
+				 
+				 
+			%%%%%%%%%%%% MEANS OF TRANSPORT %%%%%%%%%%%%%%%%%%
+
+preferenceSatisfactionH(Offer,Customer,[means(M)|T],S,S1):-
+		offerMean(Offer,M),
+		customerPreferredMean(Customer,M,R),
+		S3 is S+R,
+		preferenceSatisfactionH(Offer,Customer,T,S3,S1).
+
+
+  preferenceSatisfactionH(Offer,Customer,[means(M)|T],S,S1):-
+		not(offerMean(Offer,M)),
+		preferenceSatisfactionH(Offer,Customer,T,S,S).
+
+
+
+                   %%%%%%%% BASE CASE %%%%%%%%%% 
+ 
+								   
+		
+      preferenceSatisfactionH(Offer, Customer, [] ,S1,S1) :-
+	        customerPreferredMean(Customer,_,_).
+       
+
+```
+
+
+
+
 ## recommendOfferForCustomer
 The predicate recommendOfferForCustomer(Prefs, ChosenPrefs, O) chooses from the list Prefs a
 subset ChosenPrefs that could be satisfied by the offer O.
